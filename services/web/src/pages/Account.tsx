@@ -47,7 +47,9 @@ export function Account() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 20, marginBottom: 16 }}>Account</h1>
+      <h1 className="page-title">Account</h1>
+      <p className="page-subtitle">Connect your wallet to check your tier, or upgrade for full access.</p>
+
       <div className="card">
         <WalletMultiButton />
 
@@ -66,15 +68,32 @@ export function Account() {
         )}
 
         {account && (
-          <div style={{ marginTop: 20 }}>
-            <div className="muted">Wallet</div>
-            <div style={{ marginBottom: 12 }}>{account.wallet_address}</div>
-
-            <div className="muted">Tier</div>
-            <div style={{ marginBottom: 12, textTransform: "uppercase" }}>{account.tier}</div>
-
-            <div className="muted">Token balance</div>
-            <div>{account.token_balance.toLocaleString()}</div>
+          <div className="stat-row" style={{ marginTop: 24, marginBottom: 0 }}>
+            <div className="stat-tile" style={{ gridColumn: "span 2" }}>
+              <div className="stat-label">Wallet</div>
+              <div className="stat-value" style={{ fontSize: 14, wordBreak: "break-all" }}>
+                {account.wallet_address}
+              </div>
+            </div>
+            <div className="stat-tile">
+              <div className="stat-label">Tier</div>
+              <div
+                className="stat-value"
+                style={{
+                  textTransform: "uppercase",
+                  background: "var(--brand-gradient)",
+                  WebkitBackgroundClip: "text",
+                  backgroundClip: "text",
+                  color: "transparent",
+                }}
+              >
+                {account.tier}
+              </div>
+            </div>
+            <div className="stat-tile">
+              <div className="stat-label">Token balance</div>
+              <div className="stat-value">{account.token_balance.toLocaleString()}</div>
+            </div>
           </div>
         )}
       </div>

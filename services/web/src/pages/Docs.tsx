@@ -10,16 +10,21 @@ const ENDPOINTS = [
   { method: "GET", path: "/v1/account", desc: "Current tier status and usage (requires auth)." },
 ];
 
+const METHOD_COLOR: Record<string, string> = {
+  GET: "var(--accent)",
+  POST: "var(--status-good)",
+};
+
 export function Docs() {
   return (
     <div>
-      <h1 style={{ fontSize: 20, marginBottom: 8 }}>API docs</h1>
-      <p className="muted" style={{ marginBottom: 16 }}>
+      <h1 className="page-title">API docs</h1>
+      <p className="page-subtitle">
         Authenticate with a wallet signature (see Account) to get a JWT, then pass it as{" "}
         <code>Authorization: Bearer &lt;token&gt;</code>. Free tier: 3 score lookups/day, no cluster detail. Hold
         1,000,000+ of the trust token for full access, free.
       </p>
-      <div className="card" style={{ padding: 0 }}>
+      <div className="card card-flush">
         <table>
           <thead>
             <tr>
@@ -31,8 +36,19 @@ export function Docs() {
           <tbody>
             {ENDPOINTS.map((e) => (
               <tr key={e.path + e.method}>
-                <td>{e.method}</td>
-                <td>{e.path}</td>
+                <td>
+                  <span
+                    style={{
+                      fontFamily: "var(--mono)",
+                      fontSize: 11.5,
+                      fontWeight: 700,
+                      color: METHOD_COLOR[e.method],
+                    }}
+                  >
+                    {e.method}
+                  </span>
+                </td>
+                <td data-mono>{e.path}</td>
                 <td className="muted">{e.desc}</td>
               </tr>
             ))}

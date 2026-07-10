@@ -18,7 +18,8 @@ export function App() {
     <div className="app-shell">
       <nav className="nav">
         <NavLink to="/" className="nav-brand">
-          TRUST LAYER
+          <span className="brand-mark" aria-hidden="true" />
+          Trust Layer
         </NavLink>
         <NavItem to="/" label="Search" />
         <NavItem to="/feed" label="Live feed" />

@@ -30,9 +30,10 @@ export function LiveFeed() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 20, marginBottom: 16 }}>Live feed</h1>
+      <h1 className="page-title">Live feed</h1>
+      <p className="page-subtitle">Every launch we score, streaming in as it happens.</p>
       {error && <p className="error-text">{error}</p>}
-      <div className="card" style={{ padding: 0 }}>
+      <div className="card card-flush">
         <table>
           <thead>
             <tr>
@@ -45,8 +46,8 @@ export function LiveFeed() {
           <tbody>
             {events.map((e, i) => (
               <tr key={`${e.mint}-${i}`}>
-                <td>{e.mint}</td>
-                <td>{e.score !== null ? e.score.toFixed(0) : "—"}</td>
+                <td data-mono>{e.mint}</td>
+                <td data-mono>{e.score !== null ? e.score.toFixed(0) : "—"}</td>
                 <td>
                   <RiskBadge riskLevel={e.risk_level} />
                 </td>
@@ -55,7 +56,7 @@ export function LiveFeed() {
             ))}
             {events.length === 0 && (
               <tr>
-                <td colSpan={4} className="muted" style={{ padding: 20 }}>
+                <td colSpan={4} className="muted" style={{ padding: 28, textAlign: "center" }}>
                   No launches scored yet.
                 </td>
               </tr>

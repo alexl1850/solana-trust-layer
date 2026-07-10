@@ -28,11 +28,45 @@ export function Home() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 20, marginBottom: 16 }}>Paste a contract address</h1>
-      <form onSubmit={search} className="search-row">
+      <div style={{ textAlign: "center", marginBottom: 40, maxWidth: 640, marginLeft: "auto", marginRight: "auto" }}>
+        <div
+          style={{
+            display: "inline-block",
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            color: "var(--brand-b)",
+            background: "var(--brand-gradient-soft)",
+            border: "1px solid var(--border)",
+            borderRadius: 999,
+            padding: "5px 14px",
+            marginBottom: 18,
+          }}
+        >
+          Real-time Solana rug detection
+        </div>
+        <h1
+          style={{
+            fontSize: 40,
+            fontWeight: 800,
+            letterSpacing: "-0.03em",
+            margin: "0 0 12px",
+            lineHeight: 1.1,
+          }}
+        >
+          Know before you ape.
+        </h1>
+        <p style={{ color: "var(--text-secondary)", fontSize: 15.5, margin: 0 }}>
+          Paste any Solana contract address for an instant risk score, backed by deployer history traced across the
+          entire funding graph — not just the wallet in front of you.
+        </p>
+      </div>
+
+      <form onSubmit={search} className="search-row" style={{ maxWidth: 640, margin: "0 auto" }}>
         <input
           type="text"
-          placeholder="Token mint address..."
+          placeholder="Paste a token mint address..."
           value={mint}
           onChange={(e) => setMint(e.target.value)}
         />
@@ -42,13 +76,13 @@ export function Home() {
       </form>
 
       {error && (
-        <p className="error-text" style={{ marginTop: 16 }}>
+        <p className="error-text" style={{ marginTop: 16, textAlign: "center" }}>
           {error}
         </p>
       )}
 
       {score && (
-        <div style={{ marginTop: 24 }}>
+        <div style={{ marginTop: 32 }}>
           <ScoreCard score={score} history={history} />
         </div>
       )}
