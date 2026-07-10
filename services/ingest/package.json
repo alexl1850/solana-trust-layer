@@ -1,0 +1,30 @@
+{
+  "name": "@solana-trust-layer/ingest",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "dev": "tsx watch src/main.ts",
+    "backtest": "tsx src/backtest.ts"
+  },
+  "dependencies": {
+    "@solana-trust-layer/db": "workspace:*",
+    "@solana-trust-layer/shared": "workspace:*",
+    "@solana-trust-layer/wallet-graph": "workspace:*",
+    "@solana-trust-layer/analysers": "workspace:*",
+    "@solana/web3.js": "^1.95.3",
+    "@supabase/supabase-js": "^2.45.4",
+    "node-cron": "^3.0.3",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "tsx": "^4.19.1",
+    "vitest": "^2.1.3",
+    "@types/ws": "^8.5.12",
+    "@types/node-cron": "^3.0.11"
+  }
+}
