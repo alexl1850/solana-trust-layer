@@ -1,4 +1,4 @@
-import type { TokenPriceLiquidity } from "@solana-trust-layer/shared";
+export type GraduationStatus = "bonding_curve" | "graduated" | "unknown";
 
 export interface AnalyserSignal {
   name: string;
@@ -11,14 +11,25 @@ export interface AnalyserSignal {
 export interface AnalyserContext {
   mint: string;
   deployerWallet: string;
-  priceLiquidity: TokenPriceLiquidity;
-  launchedAt: Date;
-  /** cluster reputation score from packages/wallet-graph, null if UNKNOWN */
-  clusterReputationScore: number | null;
+  top3HolderPct: number;
+  liquiditySol: number;
+  liquidityUsd: number;
+  volume5mUsd: number;
+  priceChange5mPct: number;
+  holderCount: number;
+  priceSol: number;
+  graduationStatus: GraduationStatus;
+  /** true when upstream (Birdeye) data is missing/unreliable — analysers must degrade to UNKNOWN */
+  stale: boolean;
 }
 
 export interface AnalysisResult {
-  /** null = UNKNOWN — analyser could not produce a confident read */
+  /**
+   * null = UNKNOWN. Otherwise a signed adjustment, not an independent 0-100
+   * score: RugAnalyser returns the learned-penalty as a negative number
+   * (0..-20), MoonAnalyser returns the learned-bonus as a positive number
+   * (0..+15). services/ingest sums these into the main WEIGHTS-based score.
+   */
   score: number | null;
   signals: AnalyserSignal[];
   stale: boolean;

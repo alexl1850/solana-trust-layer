@@ -95,3 +95,16 @@ export interface FundingAncestorRow {
   hop: number;
   path: string[];
 }
+
+export type PatternKind = "rug" | "moon";
+
+/** Ported from the source bot's patternStore.ts / moonStore.ts learned-weight system. */
+export interface LearnedPattern {
+  id: string;
+  kind: PatternKind;
+  description: string;
+  positive_count: number;
+  negative_count: number;
+  weight: number;
+  last_seen: string;
+}

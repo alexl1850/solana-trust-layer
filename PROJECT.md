@@ -31,10 +31,18 @@ position management, entries/exits — is stripped and NOT included):
 | LP monitoring logic | Live score updates |
 | Birdeye price/liquidity layer | Kept, but rate-limited (Birdeye Lite = 15 RPS) behind a global limiter + cache so public traffic never hits Birdeye directly |
 
-> **Status:** this repo currently contains scaffolding and stub interfaces for
-> the ported modules (see `packages/analysers`). The actual source has not yet
-> been transferred into this environment — stubs document the expected
-> contract so the real port is a drop-in once the source is available.
+> **Status:** ported. `rugAnalyser`/`moonAnalyser` (pattern-signal extraction +
+> learned weights), `patternStore`/`moonStore` (seeded with the source bot's
+> real 87-labeled-rug / 100-labeled-moon dataset), the Helius websocket
+> discovery feed, volume divergence detection, and the pump.fun bonding-curve
+> reader are all real, working ports — see `packages/analysers` and
+> `services/ingest`. One exception: `devWalletTracker`'s blacklist data
+> (`dev-wallets.json`) was **not** ported — the source has a bug
+> (`rugAnalyser.ts` calls `recordDevRug(pos.mint, pos.mint)`, since `Position`
+> never captured a deployer wallet at all), so every tracked "wallet" in that
+> dataset is actually a token mint. `packages/wallet-graph`'s cluster-reputation
+> engine replaces that feature properly, since it derives the real deployer
+> wallet from the launch transaction itself.
 
 ## Tech stack
 

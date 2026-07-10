@@ -94,4 +94,49 @@ export class HeliusClient {
     }
     return total;
   }
+
+  /** On-chain total supply (UI units) for a mint — used to turn Birdeye's raw holder amounts into percentages. */
+  async getTokenSupplyUi(mint: string): Promise<number> {
+    const supply = await this.connection.getTokenSupply(new PublicKey(mint));
+    return supply.value.uiAmount ?? 0;
+  }
+
+  /** Raw account info, e.g. for reading a pump.fun bonding-curve PDA's account data. */
+  async getAccountInfo(address: string): Promise<{ data: Buffer } | null> {
+    const info = await this.connection.getAccountInfo(new PublicKey(address));
+    if (!info) return null;
+    return { data: info.data };
+  }
+
+  /**
+   * Token-balance deltas for a transaction — used by launch detection to
+   * work out which mint is genuinely new (see services/ingest's
+   * launch-listener for the venue-specific picking logic).
+   */
+  async getTransactionTokenBalances(signature: string): Promise<TransactionTokenBalances | null> {
+    const tx = await this.connection.getParsedTransaction(signature, {
+      maxSupportedTransactionVersion: 0,
+      commitment: "confirmed",
+    });
+    if (!tx?.meta) return null;
+
+    const accountKeys = tx.transaction.message.accountKeys.map((k) => k.pubkey.toBase58());
+    const preMints = (tx.meta.preTokenBalances ?? []).map((b) => b.mint);
+    const post = tx.meta.postTokenBalances ?? [];
+    const postMints = post.map((b) => b.mint);
+    const postMintOwnerPrograms: Record<string, string> = {};
+    for (const b of post) {
+      if (b.mint) postMintOwnerPrograms[b.mint] = String((b as { programId?: string }).programId ?? "");
+    }
+
+    return { accountKeys, preMints, postMints, postMintOwnerPrograms };
+  }
+}
+
+export interface TransactionTokenBalances {
+  accountKeys: string[];
+  preMints: string[];
+  postMints: string[];
+  /** mint -> owning token program id (used for Token-2022 detection) */
+  postMintOwnerPrograms: Record<string, string>;
 }

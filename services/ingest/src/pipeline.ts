@@ -1,15 +1,20 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { BirdeyeClient } from "@solana-trust-layer/shared";
+import type { BirdeyeClient, HeliusClient } from "@solana-trust-layer/shared";
 import type { RugAnalyser, MoonAnalyser } from "@solana-trust-layer/analysers";
 import type { ClusterEngine } from "@solana-trust-layer/wallet-graph";
 import type { ScoreTrigger } from "@solana-trust-layer/db";
-import { combineScores } from "./scoring.js";
+import { gatherMetrics } from "./metrics.js";
+import { computeBreakdown } from "./breakdown.js";
+import { detectVolumeDivergence } from "./volume-divergence.js";
+import { combineFinalScore } from "./scoring.js";
 
 export interface LaunchEvent {
   mint: string;
   deployerWallet: string;
   name?: string;
   symbol?: string;
+  venue?: "pumpfun" | "pumpswap" | "raydium";
+  isToken2022?: boolean;
 }
 
 /**
@@ -21,6 +26,7 @@ export class ScoringPipeline {
   constructor(
     private readonly db: SupabaseClient,
     private readonly birdeye: BirdeyeClient,
+    private readonly helius: Pick<HeliusClient, "getAccountInfo">,
     private readonly rugAnalyser: RugAnalyser,
     private readonly moonAnalyser: MoonAnalyser,
     private readonly clusterEngine: ClusterEngine,
@@ -40,7 +46,7 @@ export class ScoringPipeline {
     if (tokenErr) throw new Error(`upsert token: ${tokenErr.message}`);
 
     const cluster = await this.clusterEngine.processNewLaunch(event.mint, event.deployerWallet);
-    await this.score(event.mint, event.deployerWallet, cluster.clusterId, cluster.reputationScore, "launch");
+    await this.score(event.mint, cluster.clusterId, cluster.reputationScore, "launch");
   }
 
   /**
@@ -72,35 +78,63 @@ export class ScoringPipeline {
       reputationScore = (cluster?.reputation_score as number | null) ?? null;
     }
 
-    await this.score(mint, token.deployer_wallet as string, (wallet?.cluster_id as string) ?? null, reputationScore, trigger);
+    await this.score(mint, (wallet?.cluster_id as string) ?? null, reputationScore, trigger);
   }
 
   private async score(
     mint: string,
-    deployerWallet: string,
     clusterId: string | null,
     clusterReputationScore: number | null,
     trigger: ScoreTrigger,
   ): Promise<void> {
-    const priceLiquidity = await this.birdeye.getPriceLiquidity(mint);
+    const solUsd = await this.birdeye.solPriceUsd();
+    const metrics = await gatherMetrics(mint, this.birdeye, this.helius, solUsd);
 
-    const ctx = {
+    // Hard rule: stale/unusable upstream data degrades to UNKNOWN, never CRITICAL.
+    if (metrics.stale) {
+      const { error } = await this.db.from("score_events").insert({
+        mint,
+        score: null,
+        risk_level: "unknown",
+        trigger,
+        signals: { reason: "stale_upstream_data" },
+        cluster_id: clusterId,
+      });
+      if (error) throw new Error(`insert score_event: ${error.message}`);
+      return;
+    }
+
+    const analyserCtx = {
       mint,
-      deployerWallet,
-      priceLiquidity,
-      launchedAt: new Date(),
-      clusterReputationScore,
+      deployerWallet: "", // not needed by the analysers themselves; cluster reputation is passed separately
+      top3HolderPct: metrics.top3HolderPct,
+      liquiditySol: metrics.liquiditySol,
+      liquidityUsd: metrics.liquidityUsd,
+      volume5mUsd: metrics.volume5mUsd,
+      priceChange5mPct: metrics.priceChange5mPct,
+      holderCount: metrics.holderCount,
+      priceSol: metrics.priceSol,
+      graduationStatus: metrics.graduation,
+      stale: false,
     };
 
-    const [rug, moon] = await Promise.all([this.rugAnalyser.analyse(ctx), this.moonAnalyser.analyse(ctx)]);
-    const final = combineScores({ rug, moon, cluster: { reputationScore: clusterReputationScore } });
+    const [rug, moon] = await Promise.all([this.rugAnalyser.analyse(analyserCtx), this.moonAnalyser.analyse(analyserCtx)]);
+    const breakdown = computeBreakdown(metrics);
+    const divergence = detectVolumeDivergence(
+      metrics.priceChange5mPct,
+      metrics.priceChange15mPct,
+      metrics.volume5mUsd,
+      metrics.volume15mUsd,
+    );
+
+    const final = combineFinalScore({ breakdown, rug, moon, divergence, clusterReputationScore });
 
     const { error } = await this.db.from("score_events").insert({
       mint,
       score: final.score,
       risk_level: final.riskLevel,
       trigger,
-      signals: { rug: rug.signals, moon: moon.signals, priceLiquidity },
+      signals: { breakdown, rug: rug.signals, moon: moon.signals, divergence },
       cluster_id: clusterId,
     });
     if (error) throw new Error(`insert score_event: ${error.message}`);

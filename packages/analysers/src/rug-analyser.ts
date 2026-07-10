@@ -1,34 +1,50 @@
 import type { AnalyserContext, AnalysisResult } from "./types.js";
 import { UNKNOWN_RESULT } from "./types.js";
+import { computeRugPatternIds } from "./pattern-signals.js";
+import type { LearnedPatternsStore } from "./learned-patterns-store.js";
 
 export interface RugAnalyser {
   analyse(ctx: AnalyserContext): Promise<AnalysisResult>;
 }
 
 /**
- * PORT TARGET: `rugAnalyser` from the private trading bot
- * (solana-meme-bot/src/analysers/rugAnalyser or equivalent). This is the
- * core of the public risk scorer.
+ * Ported from the source bot's `rugAnalyser` + `patternStore` — the core of
+ * the public risk scorer (PROJECT.md Phase 1/2).
  *
- * Behavior to preserve when porting:
- *  - Rug pattern detection trained on `patternStore`'s labeled outcomes
- *    (LP pulls, dev wallet sell-offs, mint/freeze authority not renounced,
- *    holder concentration, etc).
- *  - The RUG_EXIT false-positive fix: when Birdeye price/liquidity data is
- *    stale, the analyser MUST degrade to UNKNOWN, never report CRITICAL.
- *    This was a real production bug in the source bot — do not regress it.
- *  - All trading/execution logic (entries, exits, position sizing) from the
- *    source module is dropped; only the detection/scoring surface is kept.
+ * The source bot computed these same pattern thresholds twice: once live at
+ * scoring time (in `scoring.ts`) to look up `learnedPenalty`, and once
+ * post-trade-close (in `rugAnalyser.ts`) to feed new observations back into
+ * `patternStore`. We only need the live half — the training/backfill half
+ * is the `learned_patterns` table, seeded from the source bot's real
+ * accumulated data (87 labeled rugs).
  *
- * StubRugAnalyser is a fail-safe placeholder used until the real port
- * lands: it always reports UNKNOWN rather than fabricating a score, so the
- * scoring pipeline (services/ingest) can run end-to-end today without
- * lying about confidence.
+ * Preserves the RUG_EXIT false-positive fix: stale Birdeye data degrades to
+ * UNKNOWN, never CRITICAL.
  */
-export class StubRugAnalyser implements RugAnalyser {
+export class DefaultRugAnalyser implements RugAnalyser {
+  constructor(private readonly patterns: LearnedPatternsStore) {}
+
   async analyse(ctx: AnalyserContext): Promise<AnalysisResult> {
-    if (ctx.priceLiquidity.stale) return UNKNOWN_RESULT;
-    // TODO: port rugAnalyser's real signal detection here.
-    return UNKNOWN_RESULT;
+    if (ctx.stale) return UNKNOWN_RESULT;
+
+    const patternIds = computeRugPatternIds({
+      top3HolderPct: ctx.top3HolderPct,
+      liquiditySol: ctx.liquiditySol,
+      priceChange5mPct: ctx.priceChange5mPct,
+      volume5mUsd: ctx.volume5mUsd,
+      holderCount: ctx.holderCount,
+      priceSol: ctx.priceSol,
+      graduationStatus: ctx.graduationStatus,
+    });
+
+    if (patternIds.length === 0) return { score: 0, signals: [], stale: false };
+
+    const penalty = await this.patterns.learnedPenalty(patternIds);
+
+    return {
+      score: -penalty,
+      signals: patternIds.map((id) => ({ name: id, value: -1, weight: penalty / patternIds.length, stale: false })),
+      stale: false,
+    };
   }
 }

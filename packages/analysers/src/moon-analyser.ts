@@ -1,27 +1,42 @@
 import type { AnalyserContext, AnalysisResult } from "./types.js";
 import { UNKNOWN_RESULT } from "./types.js";
+import { computeMoonPatternIds } from "./pattern-signals.js";
+import type { LearnedPatternsStore } from "./learned-patterns-store.js";
 
 export interface MoonAnalyser {
   analyse(ctx: AnalyserContext): Promise<AnalysisResult>;
 }
 
 /**
- * PORT TARGET: `moonAnalyser` + `moonStore` from the source bot — the
- * positive-signal side of the score (legit-token detection: healthy holder
- * distribution growth, sustained volume, renounced authorities, LP locked/
- * burned, organic social signal, etc).
- *
- * `moonStore` held accumulated legit-signal state per token; when porting,
- * fold its persisted state into this analyser's inputs rather than keeping
- * a second bespoke store — packages/db's `tokens`/`score_events` tables are
- * the single source of truth here.
- *
- * StubMoonAnalyser is a fail-safe placeholder pending the real port.
+ * Ported from the source bot's `moonAnalyser` + `moonStore` — the
+ * positive-signal side of the score (PROJECT.md Phase 1/2), backed by the
+ * source bot's real accumulated data (100 labeled moons / 137 mediocre
+ * exits) seeded into `learned_patterns`.
  */
-export class StubMoonAnalyser implements MoonAnalyser {
+export class DefaultMoonAnalyser implements MoonAnalyser {
+  constructor(private readonly patterns: LearnedPatternsStore) {}
+
   async analyse(ctx: AnalyserContext): Promise<AnalysisResult> {
-    if (ctx.priceLiquidity.stale) return UNKNOWN_RESULT;
-    // TODO: port moonAnalyser + moonStore's real signal detection here.
-    return UNKNOWN_RESULT;
+    if (ctx.stale) return UNKNOWN_RESULT;
+
+    const patternIds = computeMoonPatternIds({
+      top3HolderPct: ctx.top3HolderPct,
+      liquiditySol: ctx.liquiditySol,
+      priceChange5mPct: ctx.priceChange5mPct,
+      volume5mUsd: ctx.volume5mUsd,
+      holderCount: ctx.holderCount,
+      priceSol: ctx.priceSol,
+      graduationStatus: ctx.graduationStatus,
+    });
+
+    if (patternIds.length === 0) return { score: 0, signals: [], stale: false };
+
+    const bonus = await this.patterns.moonBonus(patternIds);
+
+    return {
+      score: bonus,
+      signals: patternIds.map((id) => ({ name: id, value: 1, weight: bonus / patternIds.length, stale: false })),
+      stale: false,
+    };
   }
 }

@@ -13,9 +13,9 @@ packages/
   db/           Supabase Postgres schema (migrations/), typed client, shared types
   shared/       config loader, Helius client, Birdeye client (rate-limited + cached), Redis
   wallet-graph/ the moat: wallet clustering (union-find, funding walk, cluster reputation)
-  analysers/    ported rug/moon analysers — currently STUBS, see "Porting status" below
+  analysers/    ported rug/moon pattern analysers, backed by the source bot's real trained data
 services/
-  ingest/       long-running worker: launch detection, scoring pipeline, safety poll, receipts job, backtest
+  ingest/       long-running worker: Helius launch discovery, WEIGHTS-based scorer, safety poll, receipts job, backtest
   api/          Fastify public API: wallet-connect auth, tiers, rate limits, score/cluster/receipts endpoints
   web/          React + Vite frontend (Vercel), dark terminal aesthetic
   x-bot/        X mention listener + reply bot
@@ -23,16 +23,29 @@ services/
 
 ## Porting status
 
-`packages/analysers` (`RugAnalyser`, `MoonAnalyser`) are **stubs** — they
-always return `UNKNOWN` rather than fabricating a score. The real detection
-logic needs to be ported from the private trading bot's source
-(`solana-meme-bot`), which was not available in the environment this scaffold
-was built in. See the `PORT TARGET` comments at the top of each file in
-`packages/analysers/src/` for the exact contract to implement, and
-`PROJECT.md`'s Phase 1/2 for the source-module → destination mapping.
+Ported from the source trading bot (`solana-meme-bot`) and real, not stubbed:
+
+- `packages/analysers`: `rugAnalyser`/`moonAnalyser` pattern-signal
+  extraction (`pattern-signals.ts`) + learned-weight lookups
+  (`learned-patterns-store.ts`), backed by the `learned_patterns` table
+  seeded from the source bot's real accumulated data (87 labeled rugs, 100
+  labeled moons — see `packages/db/migrations/0004_seed_learned_patterns.sql`).
+- `services/ingest`: the full WEIGHTS-based scorer (`breakdown.ts`,
+  ported from `scoring.ts`), Helius websocket launch discovery
+  (`launch-listener.ts`, ported from `discovery.ts` — pump.fun/PumpSwap/
+  Raydium program-log detection), the pump.fun bonding-curve reader
+  (`graduation.ts`), and volume-divergence detection (`volume-divergence.ts`).
+
+**Not ported:** the source's `devWalletTracker` blacklist (`dev-wallets.json`,
+~60 entries) has a real bug — `rugAnalyser.ts` calls
+`recordDevRug(pos.mint, pos.mint)`, so every tracked "wallet" is actually a
+token mint (the source's `Position` type never captured a deployer wallet at
+all). See the comment at the top of `packages/analysers/src/dev-wallet-tracker.ts`.
+`packages/wallet-graph`'s cluster-reputation engine replaces this feature
+properly — it derives the real deployer wallet from the launch transaction.
 
 Everything else (DB schema, wallet clustering, scoring pipeline wiring, API,
-web app, X bot) is real, working code — not stubs — and has unit test
+web app, X bot) is original code built for this product, with unit test
 coverage for its core logic.
 
 ## Working in this repo
