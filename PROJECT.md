@@ -200,6 +200,23 @@ that energy, not corporate SaaS). Mobile-first responsive.
 
 ## Phase 5 — X Bot
 
+Split into two independently-toggleable pieces, because they have very
+different X API cost profiles:
+
+**Posting only (works on X's free tier — on by default):**
+- Auto-post receipts: when a token scored HIGH/CRITICAL drops >80%
+  liquidity, post the receipt to our own timeline with the timestamp proof
+  link (`receipts-monitor.ts`).
+- Auto-post wins: when a token scored LOW risk peaks at a confirmed
+  multiple (peak followed by a real pullback, so we're not claiming a top
+  nobody could have called) — "Called X at $Y, peaked at $Z, that's an Nx"
+  (`wins-monitor.ts`). Hypothetical entry (price at the moment we called it
+  low-risk) vs confirmed peak — not a simulated trade with position sizing
+  or execution timing, just a transparent readout of two prices.
+
+**Mention replies (needs X's paid read access, Basic tier+ — opt-in via
+`X_ENABLE_MENTION_REPLIES`, off by default to avoid the $200+/mo cost until
+there's revenue to justify it):**
 - Listen for mentions containing a Solana CA (base58 regex + on-chain
   validation).
 - Reply with: score, risk level, one-line cluster summary, link to full
@@ -207,11 +224,10 @@ that energy, not corporate SaaS). Mobile-first responsive.
 - Rate-limit budget: X Basic tier caps. Maintain a reply-budget counter; if
   nearing cap, prioritize replies on tokens with high mention velocity.
 - Dedupe: one reply per token per hour max, unless score changes risk level.
-- Auto-post receipts: when a token scored HIGH/CRITICAL drops >80%
-  liquidity, post the receipt to our own timeline with the timestamp proof
-  link.
-- All bot-issued scores logged to `score_events` like any other (covered by
-  the Merkle receipts).
+
+All bot-issued content is derived straight from `score_events` / live
+Birdeye prices — nothing here is logged as a NEW score, so it's already
+covered by the existing Merkle receipts on the score data itself.
 
 ---
 

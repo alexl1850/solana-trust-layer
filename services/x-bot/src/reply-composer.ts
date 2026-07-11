@@ -29,3 +29,26 @@ export function composeReceiptPost(params: {
     params.reportUrl,
   ].join("\n");
 }
+
+/** Compact price formatting for meme-coin-scale prices (e.g. $0.0000041) without going full scientific notation. */
+function formatPrice(priceUsd: number): string {
+  if (priceUsd >= 1) return `$${priceUsd.toFixed(2)}`;
+  if (priceUsd >= 0.01) return `$${priceUsd.toFixed(4)}`;
+  const decimals = Math.max(4, -Math.floor(Math.log10(priceUsd)) + 2);
+  return `$${priceUsd.toFixed(decimals)}`;
+}
+
+export function composeWinPost(params: {
+  mint: string;
+  multiple: number;
+  entryPriceUsd: number;
+  peakPriceUsd: number;
+  reportUrl: string;
+}): string {
+  return [
+    `Called ${params.mint} LOW RISK at ${formatPrice(params.entryPriceUsd)}.`,
+    `Peaked at ${formatPrice(params.peakPriceUsd)} — that's a ${params.multiple.toFixed(1)}x.`,
+    `(Hypothetical: entry at call time, exit at confirmed peak. Not financial advice.)`,
+    params.reportUrl,
+  ].join("\n");
+}

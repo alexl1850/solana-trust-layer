@@ -51,6 +51,9 @@ export function loadConfig() {
       accessTokenSecret: optional("X_ACCESS_TOKEN_SECRET", ""),
       bearerToken: optional("X_BEARER_TOKEN", ""),
       replyBudgetPerDay: Number(optional("X_REPLY_BUDGET_PER_DAY", "1000")),
+      /** Reading mentions requires a paid X API tier (Basic+); receipts-posting only needs write access, which is free-tier. Off by default. */
+      enableMentionReplies: optional("X_ENABLE_MENTION_REPLIES", "false") === "true",
+      reportBaseUrl: optional("REPORT_BASE_URL", "https://app.solanatrustlayer.com"),
     },
     ports: {
       api: Number(optional("API_PORT", "3000")),
