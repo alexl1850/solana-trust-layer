@@ -9,6 +9,7 @@ import { registerScoreRoutes } from "./routes/score.js";
 import { registerClusterRoutes } from "./routes/cluster.js";
 import { registerReceiptsRoutes } from "./routes/receipts.js";
 import { registerAccountRoutes } from "./routes/account.js";
+import { registerFomoRoutes } from "./routes/fomo.js";
 import { scheduleBalanceRecheck } from "./balance-recheck.js";
 
 async function main() {
@@ -33,6 +34,7 @@ async function main() {
   registerClusterRoutes(app, { db });
   registerReceiptsRoutes(app, { db });
   registerAccountRoutes(app, { db });
+  registerFomoRoutes(app, { db });
 
   app.get("/healthz", async () => ({ ok: true }));
 

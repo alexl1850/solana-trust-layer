@@ -13,6 +13,20 @@ otherwise a paid subscription.
 **We are NOT building a trading bot.** We are converting an existing private
 trading bot's analysis engine into a public scoring product.
 
+### Multi-chain early-volume / pre-FOMO alerts
+
+Alongside Solana rug-risk scoring, the platform also surfaces meme coins
+showing early volume acceleration — on Solana, Ethereum, Base, and BSC —
+before they hit broad FOMO buying (see `packages/analysers/src/fomo-
+signals.ts`, `services/ingest/src/fomo-breakdown.ts`, `multichain-
+scanner.ts`, and the `GET /v1/fomo/feed` API route). This is **detect-and-
+alert only**, same as the rug-risk score: it never places an order or holds
+a wallet/exchange key (hard rule 1 still applies in full — see below). The
+resulting `fomo_score` is a heuristic pattern-match against an early-
+momentum shape, not a predicted or guaranteed return; unlike `rugAnalyser`/
+`moonAnalyser`, it has no historical labeled dataset behind it yet and
+should be treated as a candidate filter to backtest, not a finished model.
+
 ## Source codebase being ported
 
 Source: `solana-meme-bot` (TypeScript/Node.js), a private trading bot.
@@ -71,9 +85,9 @@ solana-trust-layer/
 │   └── x-bot/        # X mention listener + reply bot
 ├── packages/
 │   ├── db/          # Supabase schema, migrations, typed client
-│   ├── shared/       # config, Helius client, Birdeye client (rate-limited + cached)
+│   ├── shared/       # config, Helius client, Birdeye client, DexScreener client, EVM pair listener (rate-limited + cached)
 │   ├── wallet-graph/ # clustering engine (union-find, funding walk, cluster reputation)
-│   └── analysers/    # ported rugAnalyser / moonAnalyser / moonStore / patternStore
+│   └── analysers/    # ported rugAnalyser / moonAnalyser / moonStore / patternStore + new multi-chain fomo-signals heuristic
 ```
 
 ---
@@ -245,7 +259,10 @@ covered by the existing Merkle receipts on the score data itself.
 
 ## Hard rules
 
-1. **No trading/execution code anywhere in this repo.**
+1. **No trading/execution code anywhere in this repo.** This includes the
+   multi-chain early-volume/pre-FOMO alert feature — it detects and alerts
+   only (`fomo_events` rows, an API feed), it must never place an order,
+   hold a wallet/exchange key, or auto-execute anything.
 2. Stale upstream data → `UNKNOWN`, never `CRITICAL` (learned from MEMEBOT's
    `RUG_EXIT` false positives).
 3. Every public score must be reproducible from `score_events` + receipts.

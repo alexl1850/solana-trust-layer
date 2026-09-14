@@ -26,7 +26,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^2.1.3
-        version: 2.1.9(@types/node@20.19.43)(terser@5.49.0)
+        version: 2.1.9(@types/node@22.7.5)(terser@5.49.0)
 
   packages/db:
     dependencies:
@@ -52,6 +52,9 @@ importers:
       '@solana/web3.js':
         specifier: ^1.95.3
         version: 1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)
+      ethers:
+        specifier: ^6.13.0
+        version: 6.17.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       ioredis:
         specifier: ^5.4.1
         version: 5.11.1
@@ -64,7 +67,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^2.1.3
-        version: 2.1.9(@types/node@20.19.43)(terser@5.49.0)
+        version: 2.1.9(@types/node@22.7.5)(terser@5.49.0)
 
   packages/wallet-graph:
     dependencies:
@@ -83,7 +86,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^2.1.3
-        version: 2.1.9(@types/node@20.19.43)(terser@5.49.0)
+        version: 2.1.9(@types/node@22.7.5)(terser@5.49.0)
 
   services/api:
     dependencies:
@@ -135,7 +138,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^2.1.3
-        version: 2.1.9(@types/node@20.19.43)(terser@5.49.0)
+        version: 2.1.9(@types/node@22.7.5)(terser@5.49.0)
 
   services/ingest:
     dependencies:
@@ -178,7 +181,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^2.1.3
-        version: 2.1.9(@types/node@20.19.43)(terser@5.49.0)
+        version: 2.1.9(@types/node@22.7.5)(terser@5.49.0)
 
   services/web:
     dependencies:
@@ -218,13 +221,13 @@ importers:
         version: 18.3.7(@types/react@18.3.31)
       '@vitejs/plugin-react':
         specifier: ^4.3.2
-        version: 4.7.0(vite@5.4.21(@types/node@20.19.43)(terser@5.49.0))
+        version: 4.7.0(vite@5.4.21(@types/node@22.7.5)(terser@5.49.0))
       typescript:
         specifier: ^5.6.3
         version: 5.9.3
       vite:
         specifier: ^5.4.8
-        version: 5.4.21(@types/node@20.19.43)(terser@5.49.0)
+        version: 5.4.21(@types/node@22.7.5)(terser@5.49.0)
 
   services/x-bot:
     dependencies:
@@ -243,7 +246,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^2.1.3
-        version: 2.1.9(@types/node@20.19.43)(terser@5.49.0)
+        version: 2.1.9(@types/node@22.7.5)(terser@5.49.0)
 
 packages:
 
@@ -786,6 +789,9 @@ packages:
     resolution: {integrity: sha512-2I0gnIVPtfnMw9ee9h1dJG7tp81+8Ob3OJb3Mv37rx5L40/b0i7djjCVvGOVqc9AEIQyvyu1i6ypKdFw8R8gQw==}
     engines: {node: ^14.21.3 || >=16}
 
+  '@noble/curves@1.2.0':
+    resolution: {integrity: sha512-oYclrNgRaM9SsBUBVbb8M6DTV7ZHRTKugureoYEncY5c65HOmRzvSiTE3y5CYaPYJA/GVkrhXEoF0M3Ya9PMnw==}
+
   '@noble/curves@1.4.2':
     resolution: {integrity: sha512-TavHr8qycMChk8UwMld0ZDRvatedkzWfH8IiaeGCfymOP5i0hSCozz9vHOL0nkwk7HRMlFnAiKpS2jrUmSybcw==}
 
@@ -808,6 +814,10 @@ packages:
   '@noble/curves@2.2.0':
     resolution: {integrity: sha512-T/BoHgFXirb0ENSPBquzX0rcjXeM6Lo892a2jlYJkqk83LqZx0l1Of7DzlKJ6jkpvMrkHSnAcgb5JegL8SeIkQ==}
     engines: {node: '>= 20.19.0'}
+
+  '@noble/hashes@1.3.2':
+    resolution: {integrity: sha512-MVC8EAQp7MvEcm30KWENFjgR+Mkmf+D189XJTkFIlwohU5hcBbn1ZkKq7KVTi2Hme3PMGF390DaL52beVrIihQ==}
+    engines: {node: '>= 16'}
 
   '@noble/hashes@1.4.0':
     resolution: {integrity: sha512-V1JJ1WTRUqHHrOSh597hURcMqVKVGL/ea3kv0gSnEdsEZ0/+VyPghM1lMNGc00z7CIQorSvbKpuJkxvuHbvdbg==}
@@ -2323,6 +2333,9 @@ packages:
   '@types/node@20.19.43':
     resolution: {integrity: sha512-6oYBAi5ikg4Pl+kGsoYtawUMBT2zZMCvPNF7pVLnHZfd1zf38DRiWn/gT01RYCdUqkv7Fhr+C9ot4/tb+2sVvA==}
 
+  '@types/node@22.7.5':
+    resolution: {integrity: sha512-jML7s2NAzMWc//QSJ1a3prpk78cOPchGvXJsC3C6R6PSMoooztvRVQEz89gmBTBY1SPMaqo5teB4uNHPdetShQ==}
+
   '@types/pg@8.20.0':
     resolution: {integrity: sha512-bEPFOaMAHTEP1EzpvHTbmwR8UsFyHSKsRisLIHVMXnpNefSbGA1bD6CVy+qKjGSqmZqNqBDV2azOBo8TgkcVow==}
 
@@ -2563,6 +2576,9 @@ packages:
     resolution: {integrity: sha512-xRQbDb9BnwDafYNn6Vwl839DYVjqXYb1XVGtWAZ1kcDc6iwAL4hg3B1dZlRiuENFeO2H53gFG3in621AdERVAg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
+
+  aes-js@4.0.0-beta.5:
+    resolution: {integrity: sha512-G965FqalsNyrPqgEGON7nIx1e/OVENSgiEIzyC63haUMuvNnwIgIjMs52hlTCKhkBny7A2ORNlfY9Zu+jmGk1Q==}
 
   agent-base@6.0.2:
     resolution: {integrity: sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==}
@@ -2952,6 +2968,7 @@ packages:
 
   crypto-js@4.2.0:
     resolution: {integrity: sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==}
+    deprecated: Active development of CryptoJS has been discontinued. This library is no longer maintained.
 
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
@@ -3156,6 +3173,10 @@ packages:
 
   ethereum-cryptography@2.2.1:
     resolution: {integrity: sha512-r/W8lkHSiTLxUxW8Rf3u4HGB0xQweG2RyETjywylKZSzLWoWAijRz8WCuOtJ6wah+avllXBqZuk29HCCvhEIRg==}
+
+  ethers@6.17.0:
+    resolution: {integrity: sha512-BpyrpIPJ3ydEVow8zGaz1DuPS7YU8DcWxuBnY9a0UA/lvAPwrMr+EPXsfrul628SRaekPNeIM4UFh/91GWZang==}
+    engines: {node: '>=14.0.0'}
 
   ev-emitter@2.1.2:
     resolution: {integrity: sha512-jQ5Ql18hdCQ4qS+RCrbLfz1n+Pags27q5TwMKvZyhp5hh2UULUYZUy1keqj6k6SYsdqIYjnmz7xyyEY0V67B8Q==}
@@ -4620,6 +4641,9 @@ packages:
   tslib@1.14.1:
     resolution: {integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==}
 
+  tslib@2.7.0:
+    resolution: {integrity: sha512-gLXCKdN1/j47AiHiOkJN69hJmcbGTHI0ImLmbYLHykhgeN0jVGola9yVjFgzCUklsZQMW55o+dW7IXv3RCXDzA==}
+
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
@@ -4666,6 +4690,9 @@ packages:
 
   uncrypto@0.1.3:
     resolution: {integrity: sha512-Ql87qFHB3s/De2ClA9e0gsnS6zXG27SkTiSJwjCc9MebbfapQfuPzumMIUMi38ezPZVNFcHI9sUIepeQfw8J8Q==}
+
+  undici-types@6.19.8:
+    resolution: {integrity: sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==}
 
   undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
@@ -5501,6 +5528,10 @@ snapshots:
 
   '@noble/ciphers@1.3.0': {}
 
+  '@noble/curves@1.2.0':
+    dependencies:
+      '@noble/hashes': 1.3.2
+
   '@noble/curves@1.4.2':
     dependencies:
       '@noble/hashes': 1.4.0
@@ -5524,6 +5555,8 @@ snapshots:
   '@noble/curves@2.2.0':
     dependencies:
       '@noble/hashes': 2.2.0
+
+  '@noble/hashes@1.3.2': {}
 
   '@noble/hashes@1.4.0': {}
 
@@ -7844,6 +7877,10 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
+  '@types/node@22.7.5':
+    dependencies:
+      undici-types: 6.19.8
+
   '@types/pg@8.20.0':
     dependencies:
       '@types/node': 20.19.43
@@ -7885,7 +7922,7 @@ snapshots:
     dependencies:
       '@types/yargs-parser': 21.0.3
 
-  '@vitejs/plugin-react@4.7.0(vite@5.4.21(@types/node@20.19.43)(terser@5.49.0))':
+  '@vitejs/plugin-react@4.7.0(vite@5.4.21(@types/node@22.7.5)(terser@5.49.0))':
     dependencies:
       '@babel/core': 7.29.7
       '@babel/plugin-transform-react-jsx-self': 7.29.7(@babel/core@7.29.7)
@@ -7893,7 +7930,7 @@ snapshots:
       '@rolldown/pluginutils': 1.0.0-beta.27
       '@types/babel__core': 7.20.5
       react-refresh: 0.17.0
-      vite: 5.4.21(@types/node@20.19.43)(terser@5.49.0)
+      vite: 5.4.21(@types/node@22.7.5)(terser@5.49.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -7904,13 +7941,13 @@ snapshots:
       chai: 5.3.3
       tinyrainbow: 1.2.0
 
-  '@vitest/mocker@2.1.9(vite@5.4.21(@types/node@20.19.43)(terser@5.49.0))':
+  '@vitest/mocker@2.1.9(vite@5.4.21(@types/node@22.7.5)(terser@5.49.0))':
     dependencies:
       '@vitest/spy': 2.1.9
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 5.4.21(@types/node@20.19.43)(terser@5.49.0)
+      vite: 5.4.21(@types/node@22.7.5)(terser@5.49.0)
 
   '@vitest/pretty-format@2.1.9':
     dependencies:
@@ -8538,6 +8575,8 @@ snapshots:
       negotiator: 1.0.0
 
   acorn@8.17.0: {}
+
+  aes-js@4.0.0-beta.5: {}
 
   agent-base@6.0.2:
     dependencies:
@@ -9242,6 +9281,19 @@ snapshots:
       '@noble/hashes': 1.4.0
       '@scure/bip32': 1.4.0
       '@scure/bip39': 1.3.0
+
+  ethers@6.17.0(bufferutil@4.1.0)(utf-8-validate@6.0.6):
+    dependencies:
+      '@adraffy/ens-normalize': 1.11.1
+      '@noble/curves': 1.2.0
+      '@noble/hashes': 1.3.2
+      '@types/node': 22.7.5
+      aes-js: 4.0.0-beta.5
+      tslib: 2.7.0
+      ws: 8.21.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   ev-emitter@2.1.2: {}
 
@@ -10938,6 +10990,8 @@ snapshots:
 
   tslib@1.14.1: {}
 
+  tslib@2.7.0: {}
+
   tslib@2.8.1: {}
 
   tsx@4.23.0:
@@ -10977,6 +11031,8 @@ snapshots:
       multiformats: 9.9.0
 
   uncrypto@0.1.3: {}
+
+  undici-types@6.19.8: {}
 
   undici-types@6.21.0: {}
 
@@ -11099,13 +11155,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  vite-node@2.1.9(@types/node@20.19.43)(terser@5.49.0):
+  vite-node@2.1.9(@types/node@22.7.5)(terser@5.49.0):
     dependencies:
       cac: 6.7.14
       debug: 4.4.3
       es-module-lexer: 1.7.0
       pathe: 1.1.2
-      vite: 5.4.21(@types/node@20.19.43)(terser@5.49.0)
+      vite: 5.4.21(@types/node@22.7.5)(terser@5.49.0)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -11117,20 +11173,20 @@ snapshots:
       - supports-color
       - terser
 
-  vite@5.4.21(@types/node@20.19.43)(terser@5.49.0):
+  vite@5.4.21(@types/node@22.7.5)(terser@5.49.0):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.5.16
       rollup: 4.62.2
     optionalDependencies:
-      '@types/node': 20.19.43
+      '@types/node': 22.7.5
       fsevents: 2.3.3
       terser: 5.49.0
 
-  vitest@2.1.9(@types/node@20.19.43)(terser@5.49.0):
+  vitest@2.1.9(@types/node@22.7.5)(terser@5.49.0):
     dependencies:
       '@vitest/expect': 2.1.9
-      '@vitest/mocker': 2.1.9(vite@5.4.21(@types/node@20.19.43)(terser@5.49.0))
+      '@vitest/mocker': 2.1.9(vite@5.4.21(@types/node@22.7.5)(terser@5.49.0))
       '@vitest/pretty-format': 2.1.9
       '@vitest/runner': 2.1.9
       '@vitest/snapshot': 2.1.9
@@ -11146,11 +11202,11 @@ snapshots:
       tinyexec: 0.3.2
       tinypool: 1.1.1
       tinyrainbow: 1.2.0
-      vite: 5.4.21(@types/node@20.19.43)(terser@5.49.0)
-      vite-node: 2.1.9(@types/node@20.19.43)(terser@5.49.0)
+      vite: 5.4.21(@types/node@22.7.5)(terser@5.49.0)
+      vite-node: 2.1.9(@types/node@22.7.5)(terser@5.49.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 20.19.43
+      '@types/node': 22.7.5
     transitivePeerDependencies:
       - less
       - lightningcss

@@ -8,6 +8,9 @@ export type ScoreTrigger =
   | "volume_divergence"
   | "safety_poll";
 
+/** Solana was the only chain until the multi-chain early-volume alert feature (see fomo_events). */
+export type Chain = "solana" | "ethereum" | "base" | "bsc";
+
 export interface Wallet {
   address: string;
   first_seen_at: string;
@@ -53,6 +56,7 @@ export interface Token {
   outcome: TokenOutcome;
   outcome_resolved_at: string | null;
   outcome_details: Record<string, unknown> | null;
+  chain: Chain;
 }
 
 export interface ScoreEvent {
@@ -64,6 +68,28 @@ export interface ScoreEvent {
   trigger: ScoreTrigger;
   signals: Record<string, unknown>;
   cluster_id: string | null;
+  created_at: string;
+  chain: Chain;
+}
+
+/**
+ * A candidate matching a pre-FOMO early-volume-acceleration heuristic
+ * (detect-and-alert only, see PROJECT.md hard rule 1 — no execution).
+ * Deliberately not a ScoreEvent: `fomo_score` is an opportunity-shape match,
+ * not a risk score, so it doesn't reuse RiskLevel semantics.
+ */
+export interface FomoEvent {
+  id: string;
+  chain: Chain;
+  token_address: string;
+  pair_address: string;
+  dex_id: string | null;
+  symbol: string | null;
+  name: string | null;
+  /** null = UNKNOWN (stale/unusable upstream data). A heuristic pattern-match score, not a predicted return. */
+  fomo_score: number | null;
+  signals: Record<string, unknown>;
+  pair_created_at: string | null;
   created_at: string;
 }
 

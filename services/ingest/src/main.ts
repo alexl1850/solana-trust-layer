@@ -1,11 +1,13 @@
 import { createClient } from "@supabase/supabase-js";
-import { loadConfig, BirdeyeClient, HeliusClient, getRedisClient } from "@solana-trust-layer/shared";
+import { loadConfig, BirdeyeClient, HeliusClient, DexScreenerClient, getRedisClient } from "@solana-trust-layer/shared";
 import { DefaultRugAnalyser, DefaultMoonAnalyser, LearnedPatternsStore } from "@solana-trust-layer/analysers";
 import { ClusterEngine } from "@solana-trust-layer/wallet-graph";
 import { ScoringPipeline } from "./pipeline.js";
 import { LaunchListener } from "./launch-listener.js";
 import { SafetyPoll } from "./safety-poll.js";
 import { scheduleReceiptsJob } from "./receipts-job.js";
+import { FomoPipeline } from "./fomo-pipeline.js";
+import { MultiChainFomoScanner } from "./multichain-scanner.js";
 
 async function main() {
   const config = loadConfig();
@@ -31,6 +33,19 @@ async function main() {
   const safetyPoll = new SafetyPoll(db, pipeline);
   safetyPoll.start();
 
+  // Multi-chain early-volume / pre-FOMO alert feature (detect-and-alert
+  // only, see PROJECT.md hard rule 1). Runs alongside the Solana-only rug-
+  // risk pipeline above; each EVM chain is only watched live if its WSS RPC
+  // URL is configured (see .env.example).
+  const dexscreener = new DexScreenerClient(redis, config.dexscreener.rateLimitRps);
+  const fomoPipeline = new FomoPipeline(db, dexscreener);
+  const fomoScanner = new MultiChainFomoScanner(fomoPipeline, {
+    ethereum: config.evm.ethereum,
+    base: config.evm.base,
+    bsc: config.evm.bsc,
+  });
+  fomoScanner.start();
+
   if (config.receipts.walletPrivateKey) {
     scheduleReceiptsJob(db, {
       cronExpression: config.receipts.merkleJobCron,
@@ -46,6 +61,7 @@ async function main() {
   process.on("SIGTERM", () => {
     listener.stop();
     safetyPoll.stop();
+    fomoScanner.stop();
     process.exit(0);
   });
 }

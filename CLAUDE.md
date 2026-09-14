@@ -11,15 +11,32 @@ pnpm workspace monorepo:
 ```
 packages/
   db/           Supabase Postgres schema (migrations/), typed client, shared types
-  shared/       config loader, Helius client, Birdeye client (rate-limited + cached), Redis
+  shared/       config loader, Helius client, Birdeye client (rate-limited + cached), DexScreener client, EVM pair listener, Redis
   wallet-graph/ the moat: wallet clustering (union-find, funding walk, cluster reputation)
-  analysers/    ported rug/moon pattern analysers, backed by the source bot's real trained data
+  analysers/    ported rug/moon pattern analysers (real trained data) + fomo-signals.ts (new multi-chain heuristic, not backed by labeled data)
 services/
-  ingest/       long-running worker: Helius launch discovery, WEIGHTS-based scorer, safety poll, receipts job, backtest
-  api/          Fastify public API: wallet-connect auth, tiers, rate limits, score/cluster/receipts endpoints
+  ingest/       long-running worker: Helius launch discovery, WEIGHTS-based scorer, safety poll, receipts job, backtest, multi-chain fomo scanner
+  api/          Fastify public API: wallet-connect auth, tiers, rate limits, score/cluster/receipts/fomo-feed endpoints
   web/          React + Vite frontend (Vercel), dark terminal aesthetic
   x-bot/        X mention listener + reply bot
 ```
+
+### Multi-chain early-volume / pre-FOMO alerts
+
+Widened scope alongside Solana rug-risk scoring: detects meme coins showing
+early volume acceleration on Solana, Ethereum, Base, and BSC before a broad
+FOMO wave, and writes alerts to a separate `fomo_events` table (see
+`packages/analysers/src/fomo-signals.ts`, `services/ingest/src/fomo-
+breakdown.ts` + `fomo-pipeline.ts` + `multichain-scanner.ts`,
+`packages/shared/src/dexscreener-client.ts` + `evm-client.ts`, and
+`GET /v1/fomo/feed`). **Detect-and-alert only** — hard rule 1 below applies
+to this feature in full, same as everything else in the repo. The
+`fomo_score` is a new, untested heuristic (no historical labeled dataset
+backs it, unlike `rugAnalyser`/`moonAnalyser`) — treat it as a candidate
+filter to backtest, never as a predicted or guaranteed return. EVM factory
+addresses in `config.ts` are well-known deployment constants but are
+env-overridable — verify them against each protocol's official docs before
+production use.
 
 ## Porting status
 
@@ -66,7 +83,9 @@ coverage for its core logic.
 ## Hard rules (from PROJECT.md — do not violate)
 
 1. No trading/execution code anywhere in this repo — this is a scoring
-   product, not a trading bot.
+   product, not a trading bot. This includes the multi-chain early-volume/
+   pre-FOMO alert feature: detect-and-alert only, never an order placer or
+   wallet/exchange-key holder.
 2. Stale upstream data (Birdeye, etc.) degrades to `UNKNOWN`, never
    `CRITICAL`. This was a real production bug in the source bot
    (`RUG_EXIT` false positives) — don't regress it.

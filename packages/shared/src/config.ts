@@ -20,6 +20,34 @@ export function loadConfig() {
       apiKey: optional("BIRDEYE_API_KEY", ""),
       rateLimitRps: Number(optional("BIRDEYE_RATE_LIMIT_RPS", "15")),
     },
+    dexscreener: {
+      rateLimitRps: Number(optional("DEXSCREENER_RATE_LIMIT_RPS", "5")),
+    },
+    // Multi-chain early-volume / pre-FOMO alert feature (detect-and-alert
+    // only, see PROJECT.md hard rule 1 — no execution). A chain's WSS URL is
+    // optional: without it, that chain's live pair-discovery listener is
+    // skipped and the multichain scanner falls back to DexScreener polling
+    // for that chain. Factory addresses below are well-known, unchanging
+    // deployment addresses (factory contracts are immutable) but are
+    // env-overridable — verify against each protocol's official deployment
+    // docs before relying on them in production.
+    evm: {
+      ethereum: {
+        wssUrl: optional("ETHEREUM_WSS_URL", ""),
+        v2FactoryAddress: optional("ETHEREUM_UNISWAP_V2_FACTORY", "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"),
+        v3FactoryAddress: optional("ETHEREUM_UNISWAP_V3_FACTORY", "0x1F98431c8aD98523631AE4a59f267346ea31F984"),
+      },
+      base: {
+        wssUrl: optional("BASE_WSS_URL", ""),
+        v2FactoryAddress: optional("BASE_UNISWAP_V2_FACTORY", ""),
+        v3FactoryAddress: optional("BASE_UNISWAP_V3_FACTORY", "0x33128a8fC17869897dcE68Ed026d694621f6FDfD"),
+      },
+      bsc: {
+        wssUrl: optional("BSC_WSS_URL", ""),
+        v2FactoryAddress: optional("BSC_PANCAKESWAP_V2_FACTORY", "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73"),
+        v3FactoryAddress: optional("BSC_PANCAKESWAP_V3_FACTORY", ""),
+      },
+    },
     redis: {
       url: optional("REDIS_URL", "redis://localhost:6379"),
     },
