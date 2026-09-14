@@ -96,6 +96,13 @@ describe("roomToRunScore", () => {
     const score = roomToRunScore({ marketCapUsd: 10_000_000, priceChange5mPct: 20, priceChange1hPct: 20 });
     expect(score).toBeCloseTo(0.6, 5);
   });
+
+  it("treats a market cap below the $100k floor as a rug-risk red flag, not room to run", () => {
+    const belowFloor = roomToRunScore({ marketCapUsd: 50_000, priceChange5mPct: 20, priceChange1hPct: 20 });
+    const atFloor = roomToRunScore({ marketCapUsd: 100_000, priceChange5mPct: 20, priceChange1hPct: 20 });
+    expect(belowFloor).toBeLessThan(atFloor);
+    expect(belowFloor).toBeCloseTo(0.525, 5); // 0.05 * 0.5 + 1.0 * 0.5
+  });
 });
 
 describe("computeFomoBreakdown", () => {

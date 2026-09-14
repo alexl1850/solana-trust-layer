@@ -31,7 +31,7 @@ describe("computeFomoPatternIds", () => {
     expect(ids).toContain("buy_pressure_above_80pct");
     expect(ids).toContain("liquidity_early_sweet_spot");
     expect(ids).toContain("price_up_5_to_40pct_5m_early_move");
-    expect(ids).toContain("market_cap_under_500k_room_to_run");
+    expect(ids).toContain("market_cap_100k_to_500k_room_to_run");
   });
 
   it("uses only the youngest pair-age bucket (mutually exclusive)", () => {
@@ -78,8 +78,15 @@ describe("computeFomoPatternIds", () => {
 
   it("returns no market-cap bucket once well above the $3m ceiling", () => {
     const ids = computeFomoPatternIds({ ...BASE, marketCapUsd: 10_000_000 });
-    expect(ids).not.toContain("market_cap_under_500k_room_to_run");
+    expect(ids).not.toContain("market_cap_100k_to_500k_room_to_run");
     expect(ids).not.toContain("market_cap_under_3m");
+    expect(ids).not.toContain("market_cap_below_100k_high_rug_risk");
+  });
+
+  it("flags a rug-risk red flag for a market cap below the $100k floor", () => {
+    const ids = computeFomoPatternIds({ ...BASE, marketCapUsd: 50_000 });
+    expect(ids).toContain("market_cap_below_100k_high_rug_risk");
+    expect(ids).not.toContain("market_cap_100k_to_500k_room_to_run");
   });
 
   it("returns an empty pattern list for a flat, stale, old pair", () => {

@@ -27,16 +27,28 @@ Widened scope alongside Solana rug-risk scoring: detects meme coins showing
 early volume acceleration on Solana, Ethereum, Base, and BSC before a broad
 FOMO wave, and writes alerts to a separate `fomo_events` table (see
 `packages/analysers/src/fomo-signals.ts`, `services/ingest/src/fomo-
-breakdown.ts` + `fomo-pipeline.ts` + `multichain-scanner.ts`,
-`packages/shared/src/dexscreener-client.ts` + `evm-client.ts`, and
-`GET /v1/fomo/feed`). **Detect-and-alert only** — hard rule 1 below applies
-to this feature in full, same as everything else in the repo. The
-`fomo_score` is a new, untested heuristic (no historical labeled dataset
-backs it, unlike `rugAnalyser`/`moonAnalyser`) — treat it as a candidate
-filter to backtest, never as a predicted or guaranteed return. EVM factory
-addresses in `config.ts` are well-known deployment constants but are
-env-overridable — verify them against each protocol's official docs before
-production use.
+breakdown.ts` + `fomo-divergence.ts` + `fomo-pipeline.ts` +
+`multichain-scanner.ts`, `packages/shared/src/dexscreener-client.ts` +
+`evm-client.ts`, and `GET /v1/fomo/feed`). **Detect-and-alert only** — hard
+rule 1 below applies to this feature in full, same as everything else in
+the repo. The `fomo_score` is a new, untested heuristic (no historical
+labeled dataset backs it, unlike `rugAnalyser`/`moonAnalyser`) — treat it
+as a candidate filter to backtest, never as a predicted or guaranteed
+return. EVM factory addresses in `config.ts` are well-known deployment
+constants but are env-overridable — verify them against each protocol's
+official docs before production use.
+
+**Rug detection is integrated** (`fomo_events.rug_risk_level`,
+`signals.rugRisk` — see `fomo-pipeline.ts`): for Solana, the pipeline reads
+the latest `score_events` row for the mint (the REAL trained
+`rugAnalyser`/`moonAnalyser` output, already written by the existing
+`ScoringPipeline` — nothing is re-implemented) and folds its risk level
+into the fomo score and `rug_risk_level`. Ethereum/Base/BSC only get
+`fomo-divergence.ts`'s chain-agnostic distribution/panic_dump heuristic (no
+holder/dev-wallet data source exists for those chains). Market cap below
+**$100k** (`MIN_MARKET_CAP_USD`, `fomo-breakdown.ts`) is always at least a
+`medium` rug-risk flag, never "room to run" — the API's `/v1/fomo/feed`
+supports `?maxRugRisk=` to filter by this.
 
 ## Porting status
 

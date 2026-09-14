@@ -25,18 +25,14 @@ async function main() {
   const moonAnalyser = new DefaultMoonAnalyser(patternsStore);
   const pipeline = new ScoringPipeline(db, birdeye, helius, rugAnalyser, moonAnalyser, clusterEngine);
 
-  const listener = new LaunchListener({ wsUrl: config.helius.wsUrl }, helius, (event) => {
-    pipeline.scoreNewLaunch(event).catch((err) => console.error(`[ingest] scoreNewLaunch(${event.mint}) failed:`, err));
-  });
-  listener.start();
-
-  const safetyPoll = new SafetyPoll(db, pipeline);
-  safetyPoll.start();
-
   // Multi-chain early-volume / pre-FOMO alert feature (detect-and-alert
-  // only, see PROJECT.md hard rule 1). Runs alongside the Solana-only rug-
-  // risk pipeline above; each EVM chain is only watched live if its WSS RPC
-  // URL is configured (see .env.example).
+  // only, see PROJECT.md hard rule 1). Constructed before the Solana launch
+  // listener below so its onLaunch callback can also feed the fomo scanner.
+  // Rug detection is integrated in two ways (see fomo-pipeline.ts): every
+  // chain gets the chain-agnostic divergence heuristic, and Solana
+  // additionally reuses the real trained rugAnalyser/moonAnalyser output
+  // already written to score_events by the pipeline above. Each EVM chain
+  // is only watched live if its WSS RPC URL is configured (.env.example).
   const dexscreener = new DexScreenerClient(redis, config.dexscreener.rateLimitRps);
   const fomoPipeline = new FomoPipeline(db, dexscreener);
   const fomoScanner = new MultiChainFomoScanner(fomoPipeline, {
@@ -45,6 +41,17 @@ async function main() {
     bsc: config.evm.bsc,
   });
   fomoScanner.start();
+
+  const listener = new LaunchListener({ wsUrl: config.helius.wsUrl }, helius, (event) => {
+    pipeline.scoreNewLaunch(event).catch((err) => console.error(`[ingest] scoreNewLaunch(${event.mint}) failed:`, err));
+    fomoScanner
+      .watchToken("solana", event.mint)
+      .catch((err) => console.error(`[ingest] fomo watchToken(solana, ${event.mint}) failed:`, err));
+  });
+  listener.start();
+
+  const safetyPoll = new SafetyPoll(db, pipeline);
+  safetyPoll.start();
 
   if (config.receipts.walletPrivateKey) {
     scheduleReceiptsJob(db, {

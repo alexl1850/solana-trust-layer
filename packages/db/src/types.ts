@@ -76,7 +76,11 @@ export interface ScoreEvent {
  * A candidate matching a pre-FOMO early-volume-acceleration heuristic
  * (detect-and-alert only, see PROJECT.md hard rule 1 — no execution).
  * Deliberately not a ScoreEvent: `fomo_score` is an opportunity-shape match,
- * not a risk score, so it doesn't reuse RiskLevel semantics.
+ * not a risk score, so it doesn't reuse RiskLevel semantics for the score
+ * itself — but `rug_risk_level` (added alongside rug-detection integration)
+ * does reuse RiskLevel, since that field genuinely is a risk assessment:
+ * the real trained rugAnalyser/moonAnalyser output (via score_events) for
+ * Solana, or the chain-agnostic divergence heuristic elsewhere.
  */
 export interface FomoEvent {
   id: string;
@@ -88,6 +92,8 @@ export interface FomoEvent {
   name: string | null;
   /** null = UNKNOWN (stale/unusable upstream data). A heuristic pattern-match score, not a predicted return. */
   fomo_score: number | null;
+  /** null = UNKNOWN (stale data, or not yet assessed). */
+  rug_risk_level: RiskLevel | null;
   signals: Record<string, unknown>;
   pair_created_at: string | null;
   created_at: string;

@@ -18,6 +18,15 @@ export const FOMO_WEIGHTS = {
   roomToRun: 10,
 } as const;
 
+/**
+ * Below this market cap a token is treated as a rug-risk red flag rather
+ * than "room to run" — a thin float this small is the easiest to move with
+ * one wallet and the easiest to rug outright, so it no longer earns
+ * roomToRun credit (see roomToRunScore below and fomo-pipeline.ts's
+ * rug-risk gating).
+ */
+export const MIN_MARKET_CAP_USD = 100_000;
+
 function clamp(v: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, v));
 }
@@ -69,6 +78,7 @@ export function roomToRunScore(
 ): number {
   let capScore: number;
   if (m.marketCapUsd <= 0) capScore = 0.3; // unknown market cap, treat neutrally-low
+  else if (m.marketCapUsd < MIN_MARKET_CAP_USD) capScore = 0.05; // below the floor — rug-risk zone, not "room to run"
   else if (m.marketCapUsd < 500_000) capScore = 1.0;
   else if (m.marketCapUsd < 3_000_000) capScore = 0.6;
   else capScore = 0.2;

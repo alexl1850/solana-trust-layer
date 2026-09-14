@@ -64,8 +64,12 @@ export function computeFomoPatternIds(m: FomoMetrics): string[] {
   if (m.priceChange5mPct < -10) patterns.push("price_down_5m_momentum_broken");
 
   // Room to run — a lower market cap has more headroom for a further
-  // double-digit move than a token that's already grown large.
-  if (m.marketCapUsd > 0 && m.marketCapUsd < 500_000) patterns.push("market_cap_under_500k_room_to_run");
+  // double-digit move than a token that's already grown large. Below the
+  // $100k floor, though, that's flipped: a float that thin is the easiest
+  // to move with one wallet and the easiest to rug outright, so it's a
+  // rug-risk flag instead of a "room to run" bonus.
+  if (m.marketCapUsd > 0 && m.marketCapUsd < 100_000) patterns.push("market_cap_below_100k_high_rug_risk");
+  else if (m.marketCapUsd >= 100_000 && m.marketCapUsd < 500_000) patterns.push("market_cap_100k_to_500k_room_to_run");
   else if (m.marketCapUsd >= 500_000 && m.marketCapUsd < 3_000_000) patterns.push("market_cap_under_3m");
 
   return patterns;

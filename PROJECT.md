@@ -27,6 +27,20 @@ momentum shape, not a predicted or guaranteed return; unlike `rugAnalyser`/
 `moonAnalyser`, it has no historical labeled dataset behind it yet and
 should be treated as a candidate filter to backtest, not a finished model.
 
+**Rug detection is integrated into every alert** (`fomo_events.rug_risk_
+level` + `signals.rugRisk`, see `services/ingest/src/fomo-pipeline.ts`):
+for Solana, the pipeline reads the token's latest `score_events` row —
+i.e. the REAL trained `rugAnalyser`/`moonAnalyser` output, not a new model —
+and folds its risk level into both the fomo score (heavy penalty on
+high/critical) and the alert's `rug_risk_level`. Ethereum/Base/BSC have no
+holder-distribution or dev-wallet-cluster data source yet, so they get only
+`fomo-divergence.ts`'s chain-agnostic distribution/panic_dump heuristic
+(mirrors `volume-divergence.ts`, rescaled for 5m/1h windows). A market cap
+under **$100k** (`MIN_MARKET_CAP_USD` in `fomo-breakdown.ts`) is always
+treated as an additional rug-risk flag (at least `medium`) rather than
+"room to run" — that thin a float is the easiest to move with one wallet
+and the easiest to rug outright.
+
 ## Source codebase being ported
 
 Source: `solana-meme-bot` (TypeScript/Node.js), a private trading bot.
